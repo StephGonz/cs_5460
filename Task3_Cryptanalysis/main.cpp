@@ -8,43 +8,41 @@
 // Cole Buhman
 // ============================================================================
 
-#include <iostream>
+#include "codec.hpp"
 #include <string>
+#include <iostream>
 #include <vector>
-#include <stdexcept>
 
-#include "FindKey.hpp"
+std::vector<std::string> myStrs = {"1", "12", "123", "1234", "12345", "123456", "1234567"};
+
+std::string run(std::string plaintext, std::string ciphertext)
+{
+    for (unsigned int i = 0; i < myStrs.size(); ++i)
+    {
+        std::string currStr = myStrs[i];
+        std::sort(currStr.begin(), currStr.end());
+
+        do {
+            std::string myCiphertext = codec::columnarTranspositionEncrypt(currStr, plaintext);
+            if (ciphertext == myCiphertext)
+            {
+                return currStr;
+            }
+        } while (next_permutation(currStr.begin(), currStr.end()));
+    }
+}
 
 int main(int argc, char *argv[])
 {
-  if (argc != 3) {
-    throw std::runtime_error(
-        "Program expected two arguments: plaintext message, ciphertext message.");
-  }
+    std::string plaintext = argv[1];
+    std::string plaintextNoSpaces = detail::removeSpaces(plaintext);
+    std::string ciphertext = argv[2];
+    std::cout << "plaintext: " + plaintextNoSpaces << std::endl;
+    std::cout << "ciphertext: " + ciphertext << std::endl;
 
-  std::string plaintext = argv[1];
-  std::string ciphertext = argv[2];
-  std::string plain_no_space = find_key::removeSpaces(plaintext);
+    auto result = run(plaintextNoSpaces, ciphertext);
 
-  int minKey = find_key::minKeyLength(plain_no_space, ciphertext);
-  int maxKey = 7;
+    printf("result: %s\n", result.c_str());
 
-  bool keySizeFound = false;
-  int testKey = minKey;
-
-  while(!keySizeFound && testKey <= maxKey)
-  {
-    std::vector<std::string> setUp = find_key::setUpColumns(testKey, plain_no_space);
-    
-    if(find_key::findColumns(setUp, ciphertext, testKey))
-    {
-      keySizeFound = true;
-      find_key::getKeyOutput(setUp, ciphertext);
-    }
-    else
-    {
-      testKey++;
-    }
-  }
-  return 0;
+    return 0;
 }
